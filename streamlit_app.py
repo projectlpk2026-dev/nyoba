@@ -1,141 +1,275 @@
-import re
+import streamlit as st
+import math
 
-# =========================
-# DATABASE UNSUR
-# =========================
+# =====================================================
+# DATABASE ALAT LAB
+# =====================================================
 
-unsur = {
-    "H": {"nama": "Hidrogen", "nomor_atom": 1, "massa_atom": 1.00794},
-    "He": {"nama": "Helium", "nomor_atom": 2, "massa_atom": 4.002602},
-    "Li": {"nama": "Litium", "nomor_atom": 3, "massa_atom": 6.941},
-    "Be": {"nama": "Berilium", "nomor_atom": 4, "massa_atom": 9.012182},
-    "B": {"nama": "Boron", "nomor_atom": 5, "massa_atom": 10.811},
-    "C": {"nama": "Karbon", "nomor_atom": 6, "massa_atom": 12.0107},
-    "N": {"nama": "Nitrogen", "nomor_atom": 7, "massa_atom": 14.0067},
-    "O": {"nama": "Oksigen", "nomor_atom": 8, "massa_atom": 15.9994},
-    "Na": {"nama": "Natrium", "nomor_atom": 11, "massa_atom": 22.98976928},
-    "Mg": {"nama": "Magnesium", "nomor_atom": 12, "massa_atom": 24.3050},
-    "Al": {"nama": "Aluminium", "nomor_atom": 13, "massa_atom": 26.9815386},
-    "Si": {"nama": "Silikon", "nomor_atom": 14, "massa_atom": 28.0855},
-    "P": {"nama": "Fosfor", "nomor_atom": 15, "massa_atom": 30.973762},
-    "S": {"nama": "Sulfur", "nomor_atom": 16, "massa_atom": 32.065},
-    "Cl": {"nama": "Klorin", "nomor_atom": 17, "massa_atom": 35.453},
-    "K": {"nama": "Kalium", "nomor_atom": 19, "massa_atom": 39.0983},
-    "Ca": {"nama": "Kalsium", "nomor_atom": 20, "massa_atom": 40.078},
-    "Fe": {"nama": "Besi", "nomor_atom": 26, "massa_atom": 55.845},
-    "Cu": {"nama": "Tembaga", "nomor_atom": 29, "massa_atom": 63.546},
-    "Zn": {"nama": "Seng", "nomor_atom": 30, "massa_atom": 65.38},
-    "Ag": {"nama": "Perak", "nomor_atom": 47, "massa_atom": 107.8682},
-    "I": {"nama": "Iodin", "nomor_atom": 53, "massa_atom": 126.90447},
-    "Ba": {"nama": "Barium", "nomor_atom": 56, "massa_atom": 137.327},
-    "Au": {"nama": "Emas", "nomor_atom": 79, "massa_atom": 196.966569},
-    "Hg": {"nama": "Merkuri", "nomor_atom": 80, "massa_atom": 200.59}
-}
+alat_lab = [
 
-# =========================
-# FUNGSI PARSING RUMUS
-# =========================
+    "Alu",
+    "Batang Pengaduk",
+    "Beaker Glass",
+    "Botol Reagen",
+    "Botol Timbang",
+    "Botol Semprot",
+    "Buret",
+    "Bunsen",
+    "Cawan Petri",
+    "Corong Kaca",
+    "Cawan Porselen",
+    "Corong Pisah",
+    "Desikator",
+    "Erlenmeyer",
+    "Gelas Ukur",
+    "Gegep Besi",
+    "Gegep Kayu",
+    "Hot Plate",
+    "Inkubator",
+    "Jarum Ose",
+    "Kaca Arloji",
+    "Kaki Tiga",
+    "Kasa Asbes",
+    "Kertas Saring",
+    "Klem Buret",
+    "Kuvet",
+    "Labu Alas Bulat",
+    "Labu Takar",
+    "Laminar Air Flow",
+    "Mikropipet",
+    "Mortar",
+    "Mekker",
+    "Neraca Analitik",
+    "Oven",
+    "pH meter",
+    "Pipet Volume",
+    "Pipet Tetes",
+    "Pipet Mohr",
+    "Piknometer",
+    "Polismen",
+    "Rak Tabung Reaksi",
+    "Sentrifus",
+    "Segitiga Porselen",
+    "Spatula",
+    "Spektrofotometer",
+    "Statif",
+    "Spirtus",
+    "Soxhlet",
+    "Tabung Reaksi",
+    "Tanur",
+    "Tutup Kaca",
+    "Termometer",
+    "Vortex",
+    "Water bath"
+]
 
-def parse_rumus(rumus):
-    stack = [{}]
-    i = 0
+# =====================================================
+# HEADER
+# =====================================================
 
-    while i < len(rumus):
-        char = rumus[i]
+st.title("🧪 APLIKASI LABORATORIUM KIMIA")
 
-        if char == "(":
-            stack.append({})
-            i += 1
+menu = st.sidebar.selectbox(
+    "MENU UTAMA",
+    [
+        "Cek Stok Alat Laboratorium",
+        "Kalkulator Molaritas",
+        "Kalkulator Pengenceran",
+        "Kalkulator Kadar",
+        "Kalkulator pH"
+    ]
+)
 
-        elif char == ")":
-            i += 1
-            angka = ""
+# =====================================================
+# MENU CEK ALAT
+# =====================================================
 
-            while i < len(rumus) and rumus[i].isdigit():
-                angka += rumus[i]
-                i += 1
+if menu == "Cek Stok Alat Laboratorium":
 
-            pengali = int(angka) if angka else 1
-            grup = stack.pop()
+    st.header("CEK STOK ALAT LABORATORIUM")
 
-            for simbol, jumlah in grup.items():
-                stack[-1][simbol] = stack[-1].get(simbol, 0) + jumlah * pengali
+    cari = st.text_input("Cari alat apa?")
 
-        elif char.isupper():
-            simbol = char
-            i += 1
+    if st.button("Cek Alat"):
 
-            if i < len(rumus) and rumus[i].islower():
-                simbol += rumus[i]
-                i += 1
-
-            angka = ""
-            while i < len(rumus) and rumus[i].isdigit():
-                angka += rumus[i]
-                i += 1
-
-            jumlah = int(angka) if angka else 1
-            stack[-1][simbol] = stack[-1].get(simbol, 0) + jumlah
+        if cari.title() in alat_lab:
+            st.success(f"Alat '{cari}' TERSEDIA di laboratorium")
 
         else:
-            raise ValueError("Format rumus kimia tidak valid!")
+            st.error(f"Alat '{cari}' TIDAK DITEMUKAN")
 
-    if len(stack) != 1:
-        raise ValueError("Tanda kurung tidak lengkap!")
+    if st.checkbox("Tampilkan Semua Alat"):
+        for alat in alat_lab:
+            st.write("-", alat)
 
-    return stack[0]
+# =====================================================
+# MENU MOLARITAS
+# =====================================================
 
+elif menu == "Kalkulator Molaritas":
 
-# =========================
-# FUNGSI HITUNG BOBOT MOLEKUL
-# =========================
+    st.header("KALKULATOR MOLARITAS")
 
-def hitung_bobot_molekul(rumus):
-    if not rumus or rumus.strip() == "":
-        return None, None, "Rumus kimia tidak boleh kosong!"
+    mol = st.number_input("Masukkan jumlah mol (mol):", min_value=0.0)
+    volume = st.number_input("Masukkan volume larutan (L):", min_value=0.0001)
 
-    rumus = rumus.strip()
+    if st.button("Hitung Molaritas"):
 
-    try:
-        komposisi = parse_rumus(rumus)
-    except ValueError as e:
-        return None, None, str(e)
+        hasil = mol / volume
 
-    total = 0
-    detail = []
+        st.success(f"Molaritas = {round(hasil, 3)} M")
 
-    for simbol, jumlah in komposisi.items():
-        if simbol not in unsur:
-            return None, None, f"Unsur {simbol} tidak ditemukan dalam database!"
+# =====================================================
+# MENU PENGENCERAN
+# =====================================================
 
-        massa_atom = unsur[simbol]["massa_atom"]
-        subtotal = massa_atom * jumlah
-        total += subtotal
+elif menu == "Kalkulator Pengenceran":
 
-        detail.append({
-            "Unsur": simbol,
-            "Nama": unsur[simbol]["nama"],
-            "Jumlah Atom": jumlah,
-            "Massa Atom": massa_atom,
-            "Subtotal": round(subtotal, 3)
-        })
+    st.header("KALKULATOR PENGENCERAN")
 
-    return round(total, 3), detail, None
+    M1 = st.number_input("Masukkan M1 (M):", min_value=0.0)
+    V1 = st.number_input("Masukkan V1 (mL):", min_value=0.0)
+    M2 = st.number_input("Masukkan M2 (M):", min_value=0.0001)
 
+    if st.button("Hitung Pengenceran"):
 
-# =========================
-# CONTOH PENGGUNAAN
-# =========================
+        V2 = (M1 * V1) / M2
 
-rumus = input("Masukkan rumus kimia: ")
+        st.success(f"V2 = {round(V2, 2)} mL")
 
-total, detail, error = hitung_bobot_molekul(rumus)
+# =====================================================
+# MENU KADAR
+# =====================================================
 
-if error:
-    print("Error:", error)
-else:
-    print("\nDetail Perhitungan:")
-    for data in detail:
-        print(data)
+elif menu == "Kalkulator Kadar":
 
-    print(f"\nBobot Molekul (Mr) {rumus} = {total}")
+    pilihan = st.selectbox(
+        "Pilih Jenis Kadar",
+        [
+            "Kadar Asam Asetat",
+            "NaOH dan Na2CO3 (Warder)",
+            "Kadar Besi(Fe)",
+            "Kadar Klorida(Cl) Iodometri",
+            "Kadar Klorida(Cl) Argentometri",
+            "Kesadahan Air"
+        ]
+    )
+
+    # =====================================================
+    # KADAR ASAM ASETAT
+    # =====================================================
+
+    if pilihan == "Kadar Asam Asetat":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        FP = st.number_input("Faktor pengenceran")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 60) * (10**-3) * FP * 100) / V_sampel
+
+            st.success(f"Kadar CH3COOH = {round(hasil,2)} %")
+
+    # =====================================================
+    # WARDER
+    # =====================================================
+
+    elif pilihan == "NaOH dan Na2CO3 (Warder)":
+
+        a = st.number_input("Volume titrasi 1/a(mL)")
+        b = st.number_input("Volume titrasi 2/b(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            BE_NaOH = 40
+            BE_Na2CO3 = 53
+
+            Na2CO3 = ((2 * (b-a)* N * BE_Na2CO3) * (10**-3) * 100) / V_sampel
+            NaOH = ((2*a - b)* N * BE_NaOH) * (10**-3) * 100 / V_sampel
+
+            st.success(f"Kadar NaOH = {round(NaOH,2)} %")
+            st.success(f"Kadar Na2CO3 = {round(Na2CO3,2)} %")
+
+    # =====================================================
+    # BESI
+    # =====================================================
+
+    elif pilihan == "Kadar Besi(Fe)":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 56) * (10**-3) * 100) / V_sampel
+
+            st.success(f"Kadar Fe = {round(hasil,2)} %")
+
+    # =====================================================
+    # IODOMETRI
+    # =====================================================
+
+    elif pilihan == "Kadar Klorida(Cl) Iodometri":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 17.75) * (10**-3) * 100/5 * 100) / V_sampel
+
+            st.success(f"Kadar Cl = {round(hasil,2)} %")
+
+    # =====================================================
+    # ARGENTOMETRI
+    # =====================================================
+
+    elif pilihan == "Kadar Klorida(Cl) Argentometri":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 35.5) * (10**-3) * 100) / V_sampel
+
+            st.success(f"Kadar Cl = {round(hasil,2)} %")
+
+    # =====================================================
+    # KESADAHAN
+    # =====================================================
+
+    elif pilihan == "Kesadahan Air":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        M = st.number_input("Molaritas/M(mmol/mL)")
+        V_sampel = st.number_input("Volume sampel (L)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * M * 100)) / V_sampel
+
+            st.success(f"Kadar CaCO3 = {round(hasil,2)} %")
+
+# =====================================================
+# MENU pH
+# =====================================================
+
+elif menu == "Kalkulator pH":
+
+    st.header("KALKULATOR pH")
+
+    h = st.number_input("Masukkan konsentrasi H+ (mol/L):", min_value=0.0000001)
+
+    if st.button("Hitung pH"):
+
+        hasil = -math.log10(h)
+
+        st.success(f"pH = {round(hasil,2)}")
