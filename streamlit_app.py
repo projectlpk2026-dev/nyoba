@@ -1,275 +1,113 @@
 import streamlit as st
-import math
+import re
+import pandas as pd
 
-# =====================================================
-# DATABASE ALAT LAB
-# =====================================================
+# =========================
+# DATABASE MASSA ATOM
+# =========================
+unsur = {
+    "H": 1.008,
+    "He": 4.0026,
+    "Li": 6.94,
+    "Be": 9.0122,
+    "B": 10.81,
+    "C": 12.011,
+    "N": 14.007,
+    "O": 15.999,
+    "F": 18.998,
+    "Ne": 20.180,
+    "Na": 22.990,
+    "Mg": 24.305,
+    "Al": 26.982,
+    "Si": 28.085,
+    "P": 30.974,
+    "S": 32.06,
+    "Cl": 35.45,
+    "Ar": 39.948,
+    "K": 39.098,
+    "Ca": 40.078,
+    "Fe": 55.845,
+    "Cu": 63.546,
+    "Zn": 65.38,
+    "Ag": 107.868,
+    "I": 126.904,
+    "Ba": 137.327,
+    "Au": 196.967,
+    "Hg": 200.592,
+    "Pb": 207.2
+}
 
-alat_lab = [
+# =========================
+# FUNGSI HITUNG Mr
+# =========================
+def hitung_mr(rumus):
+    pola = r'([A-Z][a-z]?)(\d*)'
+    hasil = re.findall(pola, rumus)
 
-    "Alu",
-    "Batang Pengaduk",
-    "Beaker Glass",
-    "Botol Reagen",
-    "Botol Timbang",
-    "Botol Semprot",
-    "Buret",
-    "Bunsen",
-    "Cawan Petri",
-    "Corong Kaca",
-    "Cawan Porselen",
-    "Corong Pisah",
-    "Desikator",
-    "Erlenmeyer",
-    "Gelas Ukur",
-    "Gegep Besi",
-    "Gegep Kayu",
-    "Hot Plate",
-    "Inkubator",
-    "Jarum Ose",
-    "Kaca Arloji",
-    "Kaki Tiga",
-    "Kasa Asbes",
-    "Kertas Saring",
-    "Klem Buret",
-    "Kuvet",
-    "Labu Alas Bulat",
-    "Labu Takar",
-    "Laminar Air Flow",
-    "Mikropipet",
-    "Mortar",
-    "Mekker",
-    "Neraca Analitik",
-    "Oven",
-    "pH meter",
-    "Pipet Volume",
-    "Pipet Tetes",
-    "Pipet Mohr",
-    "Piknometer",
-    "Polismen",
-    "Rak Tabung Reaksi",
-    "Sentrifus",
-    "Segitiga Porselen",
-    "Spatula",
-    "Spektrofotometer",
-    "Statif",
-    "Spirtus",
-    "Soxhlet",
-    "Tabung Reaksi",
-    "Tanur",
-    "Tutup Kaca",
-    "Termometer",
-    "Vortex",
-    "Water bath"
-]
+    if not hasil:
+        return None, "Format rumus kimia tidak valid."
 
-# =====================================================
-# HEADER
-# =====================================================
+    data = []
+    total_mr = 0
 
-st.title("🧪 APLIKASI LABORATORIUM KIMIA")
+    for simbol, jumlah in hasil:
+        if simbol not in unsur:
+            return None, f"Unsur '{simbol}' tidak ditemukan dalam database."
 
-menu = st.sidebar.selectbox(
-    "MENU UTAMA",
-    [
-        "Cek Stok Alat Laboratorium",
-        "Kalkulator Molaritas",
-        "Kalkulator Pengenceran",
-        "Kalkulator Kadar",
-        "Kalkulator pH"
-    ]
+        jumlah_atom = int(jumlah) if jumlah else 1
+        massa_atom = unsur[simbol]
+        subtotal = massa_atom * jumlah_atom
+        total_mr += subtotal
+
+        data.append({
+            "Simbol Unsur": simbol,
+            "Jumlah Atom": jumlah_atom,
+            "Massa Atom": massa_atom,
+            "Subtotal Massa": subtotal
+        })
+
+    return data, total_mr
+
+
+# =========================
+# TAMPILAN WEB
+# =========================
+st.set_page_config(
+    page_title="Kalkulator Bobot Molekul",
+    page_icon="⚗️",
+    layout="centered"
 )
 
-# =====================================================
-# MENU CEK ALAT
-# =====================================================
+st.title("⚗️ Kalkulator Bobot Molekul")
+st.write("Aplikasi ini digunakan untuk menghitung bobot molekul atau Mr suatu senyawa kimia.")
 
-if menu == "Cek Stok Alat Laboratorium":
+rumus = st.text_input(
+    "Masukkan rumus kimia senyawa:",
+    placeholder="Contoh: H2O, CO2, NaCl, C6H12O6"
+)
 
-    st.header("CEK STOK ALAT LABORATORIUM")
+if st.button("Hitung Mr"):
+    if rumus.strip() == "":
+        st.warning("Masukkan rumus kimia terlebih dahulu.")
+    else:
+        data, hasil = hitung_mr(rumus.strip())
 
-    cari = st.text_input("Cari alat apa?")
-
-    if st.button("Cek Alat"):
-
-        if cari.title() in alat_lab:
-            st.success(f"Alat '{cari}' TERSEDIA di laboratorium")
-
+        if data is None:
+            st.error(hasil)
         else:
-            st.error(f"Alat '{cari}' TIDAK DITEMUKAN")
+            df = pd.DataFrame(data)
 
-    if st.checkbox("Tampilkan Semua Alat"):
-        for alat in alat_lab:
-            st.write("-", alat)
+            st.subheader("Hasil Perhitungan")
+            st.dataframe(df, use_container_width=True)
 
-# =====================================================
-# MENU MOLARITAS
-# =====================================================
+            st.success(f"Bobot molekul (Mr) dari {rumus} adalah {hasil:.3f} g/mol")
 
-elif menu == "Kalkulator Molaritas":
+            st.subheader("Rincian Perhitungan")
+            for item in data:
+                st.write(
+                    f"{item['Simbol Unsur']} : "
+                    f"{item['Massa Atom']} × {item['Jumlah Atom']} = "
+                    f"{item['Subtotal Massa']:.3f}"
+                )
 
-    st.header("KALKULATOR MOLARITAS")
-
-    mol = st.number_input("Masukkan jumlah mol (mol):", min_value=0.0)
-    volume = st.number_input("Masukkan volume larutan (L):", min_value=0.0001)
-
-    if st.button("Hitung Molaritas"):
-
-        hasil = mol / volume
-
-        st.success(f"Molaritas = {round(hasil, 3)} M")
-
-# =====================================================
-# MENU PENGENCERAN
-# =====================================================
-
-elif menu == "Kalkulator Pengenceran":
-
-    st.header("KALKULATOR PENGENCERAN")
-
-    M1 = st.number_input("Masukkan M1 (M):", min_value=0.0)
-    V1 = st.number_input("Masukkan V1 (mL):", min_value=0.0)
-    M2 = st.number_input("Masukkan M2 (M):", min_value=0.0001)
-
-    if st.button("Hitung Pengenceran"):
-
-        V2 = (M1 * V1) / M2
-
-        st.success(f"V2 = {round(V2, 2)} mL")
-
-# =====================================================
-# MENU KADAR
-# =====================================================
-
-elif menu == "Kalkulator Kadar":
-
-    pilihan = st.selectbox(
-        "Pilih Jenis Kadar",
-        [
-            "Kadar Asam Asetat",
-            "NaOH dan Na2CO3 (Warder)",
-            "Kadar Besi(Fe)",
-            "Kadar Klorida(Cl) Iodometri",
-            "Kadar Klorida(Cl) Argentometri",
-            "Kesadahan Air"
-        ]
-    )
-
-    # =====================================================
-    # KADAR ASAM ASETAT
-    # =====================================================
-
-    if pilihan == "Kadar Asam Asetat":
-
-        V = st.number_input("Volume titrasi/V(mL)")
-        N = st.number_input("Normalitas/N(mgrek/mL)")
-        FP = st.number_input("Faktor pengenceran")
-        V_sampel = st.number_input("Volume sampel (mL)")
-
-        if st.button("Hitung"):
-
-            hasil = ((V * N * 60) * (10**-3) * FP * 100) / V_sampel
-
-            st.success(f"Kadar CH3COOH = {round(hasil,2)} %")
-
-    # =====================================================
-    # WARDER
-    # =====================================================
-
-    elif pilihan == "NaOH dan Na2CO3 (Warder)":
-
-        a = st.number_input("Volume titrasi 1/a(mL)")
-        b = st.number_input("Volume titrasi 2/b(mL)")
-        N = st.number_input("Normalitas/N(mgrek/mL)")
-        V_sampel = st.number_input("Volume sampel (mL)")
-
-        if st.button("Hitung"):
-
-            BE_NaOH = 40
-            BE_Na2CO3 = 53
-
-            Na2CO3 = ((2 * (b-a)* N * BE_Na2CO3) * (10**-3) * 100) / V_sampel
-            NaOH = ((2*a - b)* N * BE_NaOH) * (10**-3) * 100 / V_sampel
-
-            st.success(f"Kadar NaOH = {round(NaOH,2)} %")
-            st.success(f"Kadar Na2CO3 = {round(Na2CO3,2)} %")
-
-    # =====================================================
-    # BESI
-    # =====================================================
-
-    elif pilihan == "Kadar Besi(Fe)":
-
-        V = st.number_input("Volume titrasi/V(mL)")
-        N = st.number_input("Normalitas/N(mgrek/mL)")
-        V_sampel = st.number_input("Volume sampel (mL)")
-
-        if st.button("Hitung"):
-
-            hasil = ((V * N * 56) * (10**-3) * 100) / V_sampel
-
-            st.success(f"Kadar Fe = {round(hasil,2)} %")
-
-    # =====================================================
-    # IODOMETRI
-    # =====================================================
-
-    elif pilihan == "Kadar Klorida(Cl) Iodometri":
-
-        V = st.number_input("Volume titrasi/V(mL)")
-        N = st.number_input("Normalitas/N(mgrek/mL)")
-        V_sampel = st.number_input("Volume sampel (mL)")
-
-        if st.button("Hitung"):
-
-            hasil = ((V * N * 17.75) * (10**-3) * 100/5 * 100) / V_sampel
-
-            st.success(f"Kadar Cl = {round(hasil,2)} %")
-
-    # =====================================================
-    # ARGENTOMETRI
-    # =====================================================
-
-    elif pilihan == "Kadar Klorida(Cl) Argentometri":
-
-        V = st.number_input("Volume titrasi/V(mL)")
-        N = st.number_input("Normalitas/N(mgrek/mL)")
-        V_sampel = st.number_input("Volume sampel (mL)")
-
-        if st.button("Hitung"):
-
-            hasil = ((V * N * 35.5) * (10**-3) * 100) / V_sampel
-
-            st.success(f"Kadar Cl = {round(hasil,2)} %")
-
-    # =====================================================
-    # KESADAHAN
-    # =====================================================
-
-    elif pilihan == "Kesadahan Air":
-
-        V = st.number_input("Volume titrasi/V(mL)")
-        M = st.number_input("Molaritas/M(mmol/mL)")
-        V_sampel = st.number_input("Volume sampel (L)")
-
-        if st.button("Hitung"):
-
-            hasil = ((V * M * 100)) / V_sampel
-
-            st.success(f"Kadar CaCO3 = {round(hasil,2)} %")
-
-# =====================================================
-# MENU pH
-# =====================================================
-
-elif menu == "Kalkulator pH":
-
-    st.header("KALKULATOR pH")
-
-    h = st.number_input("Masukkan konsentrasi H+ (mol/L):", min_value=0.0000001)
-
-    if st.button("Hitung pH"):
-
-        hasil = -math.log10(h)
-
-        st.success(f"pH = {round(hasil,2)}")
+            st.write(f"**Total Mr = {hasil:.3f} g/mol**")
