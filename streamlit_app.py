@@ -1,87 +1,313 @@
-import streamlit as st
-import re
-import pandas as pd
+# =====================================================
+# APLIKASI LABORATORIUM KIMIA
+# =====================================================
 
-# Database massa atom relatif
-massa_atom = {
-    "H": 1.008,
-    "C": 12.011,
-    "N": 14.007,
-    "O": 15.999,
-    "Na": 22.990,
-    "Mg": 24.305,
-    "Al": 26.982,
-    "Si": 28.085,
-    "P": 30.974,
-    "S": 32.06,
-    "Cl": 35.45,
-    "K": 39.098,
-    "Ca": 40.078,
-    "Fe": 55.845,
-    "Cu": 63.546,
-    "Zn": 65.38,
-    "Ag": 107.868,
-    "I": 126.904,
-    "Ba": 137.327,
-    "Pb": 207.2
-}
+import math
 
-def hitung_mr(rumus):
-    pola = r"([A-Z][a-z]?)(\d*)"
-    hasil = re.findall(pola, rumus)
+# =====================================================
+# DATABASE ALAT LAB
+# =====================================================
 
-    if not hasil:
-        return None, "Format rumus kimia tidak valid."
+alat_lab = [
 
-    data = []
-    total_mr = 0
+    "Alu",
+    "Batang Pengaduk",
+    "Beaker Glass",
+    "Botol Reagen",
+    "Botol Timbang",
+    "Botol Semprot",
+    "Buret",
+    "Bunsen",
+    "Cawan Petri",
+    "Corong Kaca",
+    "Cawan Porselen",
+    "Corong Pisah",
+    "Desikator",
+    "Erlenmeyer",
+    "Gelas Ukur",
+    "Gegep Besi",
+    "Gegep Kayu",
+    "Hot Plate",
+    "Inkubator",
+    "Jarum Ose",
+    "Kaca Arloji",
+    "Kaki Tiga",
+    "Kasa Asbes",
+    "Kertas Saring",
+    "Klem Buret",
+    "Kuvet",
+    "Labu Alas Bulat",
+    "Labu Takar",
+    "Laminar Air Flow",
+    "Mikropipet",
+    "Mortar",
+    "Mekker",
+    "Neraca Analitik",
+    "Oven",
+    "pH meter",
+    "Pipet Volume",
+    "Pipet Tetes",
+    "Pipet Mohr",
+    "Piknometer",
+    "Polismen",
+    "Rak Tabung Reaksi",
+    "Sentrifus",
+    "Segitiga Porselen",
+    "Spatula",
+    "Spektrofotometer",
+    "Statif",
+    "Spirtus",
+    "Soxhlet",
+    "Tabung Reaksi",
+    "Tanur",
+    "Tutup Kaca",
+    "Termometer",
+    "Vortex",
+    "Water bath"
+    
+]
 
-    for unsur, jumlah in hasil:
-        jumlah_atom = int(jumlah) if jumlah else 1
+# =====================================================
+# HEADER
+# =====================================================
 
-        if unsur not in massa_atom:
-            return None, f"Unsur '{unsur}' tidak ditemukan dalam database massa atom."
+def header():
 
-        massa = massa_atom[unsur]
-        subtotal = massa * jumlah_atom
-        total_mr += subtotal
+    print("=" * 55)
+    print("      APLIKASI LABORATORIUM KIMIA")
+    print("=" * 55)
 
-        data.append({
-            "Simbol Unsur": unsur,
-            "Jumlah Atom": jumlah_atom,
-            "Massa Atom": massa,
-            "Subtotal Massa": subtotal
-        })
+# =====================================================
+# MENU CEK ALAT
+# =====================================================
 
-    return data, total_mr
+def cek_alat():
 
+    print("\n=== CEK STOK ALAT LABORATORIUM ===")
 
-st.title("Kalkulator Bobot Molekul (Mr)")
-st.write("Program ini digunakan untuk menghitung bobot molekul relatif suatu senyawa kimia berdasarkan rumus kimianya.")
+    print("Ketik 'daftar' untuk melihat semua alat")
+    print("Ketik 'keluar' untuk kembali ke menu")
 
-rumus = st.text_input("Masukkan rumus kimia senyawa", placeholder="Contoh: H2O, CO2, NaCl, C6H12O6")
+    while True:
 
-if st.button("Hitung Mr"):
-    if rumus.strip() == "":
-        st.warning("Masukkan rumus kimia terlebih dahulu.")
-    else:
-        data, hasil = hitung_mr(rumus.strip())
+        cari = input("\nCari alat apa? ").strip().title()
 
-        if data is None:
-            st.error(hasil)
+        # keluar
+        if cari.lower() == "keluar":
+            break
+
+        # tampil semua alat
+        elif cari.lower() == "daftar":
+
+            print("\nAlat yang tersedia:")
+
+            for alat in alat_lab:
+                print("-", alat)
+
+        # pencarian alat
+        elif cari in alat_lab:
+
+            print(f"\nAlat '{cari}' TERSEDIA di laboratorium")
+
         else:
-            df = pd.DataFrame(data)
-            st.subheader("Hasil Perhitungan")
-            st.dataframe(df, use_container_width=True)
 
-            st.success(f"Total bobot molekul (Mr) {rumus} = {hasil:.3f}")
+            print(f"\nAlat '{cari}' TIDAK DITEMUKAN")
 
-st.subheader("Database Massa Atom")
-st.write("Berikut beberapa unsur yang tersedia dalam database:")
-st.dataframe(
-    pd.DataFrame(
-        list(massa_atom.items()),
-        columns=["Simbol Unsur", "Massa Atom"]
-    ),
-    use_container_width=True
-)
+# =====================================================
+# MENU MOLARITAS
+# =====================================================
+
+def molaritas():
+
+    print("\n=== KALKULATOR MOLARITAS ===")
+
+    mol = float(input("Masukkan jumlah mol (mol): "))
+    volume = float(input("Masukkan volume larutan (L): "))
+
+    hasil = mol / volume
+
+    print("\nMolaritas =", round(hasil, 3), "M")
+
+# =====================================================
+# MENU PENGENCERAN
+# =====================================================
+
+def pengenceran():
+
+    print("\n=== KALKULATOR PENGENCERAN ===")
+
+    M1 = float(input("Masukkan M1 (M): "))
+    V1 = float(input("Masukkan V1 (mL): "))
+    M2 = float(input("Masukkan M2 (M): "))
+
+    V2 = (M1 * V1) / M2
+
+    print("\nV2 =", round(V2, 2), "mL")
+
+# =====================================================
+# MENU KADAR
+# =====================================================
+
+def menu_kadar():
+    while True:
+
+        print("\n=== KALKULATOR KADAR ===")
+        print("1. Kadar Asam Asetat")
+        print("2. NaOH dan Na2CO3 (Warder)")
+        print("3. Kadar Besi(Fe)")
+        print("4. Kadar Klorida(Cl)Iodometri")
+        print("5. Kadar Klorida(Cl)Argentometri")
+        print("6. Kesadahan Air")
+        print("7. Kembali")
+        
+        pilih = input("Pilih menu : ")
+        if pilih == "1":
+            kadar_asam_asetat()
+
+        elif pilih == "2":
+            kadar_warder()
+
+        elif pilih == "3":
+            kadar_besi()
+
+        elif pilih == "4":
+            kadar_klorida_iodometri()
+
+        elif pilih == "5":
+            kadar_klorida_argentometri()
+            
+        elif pilih == "6":
+            kadar_kesadahan()
+
+        elif pilih == "7":
+            break
+
+        else:
+            print("Pilihan tidak valid")
+
+def kadar_asam_asetat():
+    print("\n=== KADAR ASAM ASETAT ===")
+    V = float(input("Masukkan volume titrasi/V(mL):"))
+    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
+    FP = float(input("Faktor pengenceran:"))
+    V_sampel = float(input("Masukkan volume sampel (mL):"))
+    hasil = ((V * N * 60) * (10**-3) * FP * 100) / V_sampel
+
+    print("\nKadar CH3COOH =", round(hasil, 2), "%")
+
+def kadar_warder():
+
+    print("\n=== KADAR METODE WARDER ===")
+    a = float(input("Masukkan volume titrasi 1/a(mL):"))
+    b = float(input("Masukkan volume titrasi 2/b(mL):"))
+    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
+    V_sampel = float(input("Masukkan volume sampel (mL):"))
+    BE_NaOH = 40
+    BE_Na2CO3 = 53
+    
+    Na2CO3 = ((2 * (b-a)* N * BE_Na2CO3) * (10**-3) * 100) / V_sampel
+    NaOH = ((2*a - b)* N * BE_NaOH) * (10**-3) * 100 / V_sampel
+
+    print("\nKadar NaOH =", round(Na2CO3, 2), "%")
+    print("\nKadar Na2CO3 =", round(NaOH, 2), "%")
+
+def kadar_besi():
+    print("\n=== KADAR BESI (Fe) ===")
+    V = float(input("Masukkan volume titrasi/V(mL):"))
+    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
+    V_sampel = float(input("Masukkan volume sampel (mL):"))
+    hasil = ((V * N * 56) * (10**-3) * 100) / V_sampel
+
+    print("\nKadar Fe =", round(hasil, 2), "%")
+    
+def kadar_klorida_iodometri():
+    print("\n=== KADAR KLORIDA (IODOMETRI)(Cl) ===")
+    V = float(input("Masukkan volume titrasi/V(mL):"))
+    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
+    V_sampel = float(input("Masukkan volume sampel (mL):"))
+    hasil = ((V * N * 17.75) * (10**-3) * 100/5 * 100) / V_sampel
+
+    print("\nKadar Cl =", round(hasil, 2), "%")
+
+def kadar_klorida_argentometri():
+    print("\n=== KADAR KLORIDA (ARGENTOMETRI)(Cl) ===")
+    V = float(input("Masukkan volume titrasi/V(mL):"))
+    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
+    V_sampel = float(input("Masukkan volume sampel (mL):"))
+    hasil = ((V * N * 35.5) * (10**-3) * 100) / V_sampel
+
+    print("\nKadar Cl =", round(hasil, 2), "%")
+
+
+def kadar_kesadahan():
+    print("\n=== KADAR KESADAHAN AIR ===")
+    V = float(input("Masukkan volume titrasi/V(mL):"))
+    M = float(input("Masukkan molaritas/M(mmol/mL):"))
+    V_sampel = float(input("Masukkan volume sampel (L):"))
+    hasil = ((V * M * 100)) /V_sampel
+
+    print("\nKadar CaCO3 =", round(hasil, 2), "%")
+    
+
+# =====================================================
+# MENU pH
+# =====================================================
+
+def ph():
+
+    print("\n=== KALKULATOR pH ===")
+
+    h = float(input("Masukkan konsentrasi H+ (mol/L): "))
+
+    hasil = -math.log10(h)
+
+    print("\npH =", round(hasil, 2))
+
+# =====================================================
+# PROGRAM UTAMA
+# =====================================================
+
+while True:
+
+    header()
+
+    print("""
+MENU UTAMA
+
+1. Cek Stok Alat Laboratorium
+2. Kalkulator Molaritas
+3. Kalkulator Pengenceran
+4. Kalkulator Kadar
+5. Kalkulator pH
+6. Keluar
+""")
+
+    pilihan = input("Masukkan pilihan : ")
+
+    # =================================================
+
+    if pilihan == "1":
+        cek_alat()
+
+    elif pilihan == "2":
+        molaritas()
+
+    elif pilihan == "3":
+        pengenceran()
+
+    elif pilihan == "4":
+        menu_kadar()
+
+    elif pilihan == "5":
+        ph()
+
+    elif pilihan == "6":
+
+        print("\nProgram selesai")
+        break
+
+    else:
+
+        print("\nPilihan tidak valid")
+
+    input("\nTekan ENTER untuk kembali ke menu...")
