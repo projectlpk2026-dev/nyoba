@@ -1,7 +1,4 @@
-# =====================================================
-# APLIKASI LABORATORIUM KIMIA
-# =====================================================
-
+import streamlit as st
 import math
 
 # =====================================================
@@ -64,250 +61,215 @@ alat_lab = [
     "Termometer",
     "Vortex",
     "Water bath"
-    
 ]
 
 # =====================================================
 # HEADER
 # =====================================================
 
-def header():
+st.title("🧪 APLIKASI LABORATORIUM KIMIA")
 
-    print("=" * 55)
-    print("      APLIKASI LABORATORIUM KIMIA")
-    print("=" * 55)
+menu = st.sidebar.selectbox(
+    "MENU UTAMA",
+    [
+        "Cek Stok Alat Laboratorium",
+        "Kalkulator Molaritas",
+        "Kalkulator Pengenceran",
+        "Kalkulator Kadar",
+        "Kalkulator pH"
+    ]
+)
 
 # =====================================================
 # MENU CEK ALAT
 # =====================================================
 
-def cek_alat():
+if menu == "Cek Stok Alat Laboratorium":
 
-    print("\n=== CEK STOK ALAT LABORATORIUM ===")
+    st.header("CEK STOK ALAT LABORATORIUM")
 
-    print("Ketik 'daftar' untuk melihat semua alat")
-    print("Ketik 'keluar' untuk kembali ke menu")
+    cari = st.text_input("Cari alat apa?")
 
-    while True:
+    if st.button("Cek Alat"):
 
-        cari = input("\nCari alat apa? ").strip().title()
-
-        # keluar
-        if cari.lower() == "keluar":
-            break
-
-        # tampil semua alat
-        elif cari.lower() == "daftar":
-
-            print("\nAlat yang tersedia:")
-
-            for alat in alat_lab:
-                print("-", alat)
-
-        # pencarian alat
-        elif cari in alat_lab:
-
-            print(f"\nAlat '{cari}' TERSEDIA di laboratorium")
+        if cari.title() in alat_lab:
+            st.success(f"Alat '{cari}' TERSEDIA di laboratorium")
 
         else:
+            st.error(f"Alat '{cari}' TIDAK DITEMUKAN")
 
-            print(f"\nAlat '{cari}' TIDAK DITEMUKAN")
+    if st.checkbox("Tampilkan Semua Alat"):
+        for alat in alat_lab:
+            st.write("-", alat)
 
 # =====================================================
 # MENU MOLARITAS
 # =====================================================
 
-def molaritas():
+elif menu == "Kalkulator Molaritas":
 
-    print("\n=== KALKULATOR MOLARITAS ===")
+    st.header("KALKULATOR MOLARITAS")
 
-    mol = float(input("Masukkan jumlah mol (mol): "))
-    volume = float(input("Masukkan volume larutan (L): "))
+    mol = st.number_input("Masukkan jumlah mol (mol):", min_value=0.0)
+    volume = st.number_input("Masukkan volume larutan (L):", min_value=0.0001)
 
-    hasil = mol / volume
+    if st.button("Hitung Molaritas"):
 
-    print("\nMolaritas =", round(hasil, 3), "M")
+        hasil = mol / volume
+
+        st.success(f"Molaritas = {round(hasil, 3)} M")
 
 # =====================================================
 # MENU PENGENCERAN
 # =====================================================
 
-def pengenceran():
+elif menu == "Kalkulator Pengenceran":
 
-    print("\n=== KALKULATOR PENGENCERAN ===")
+    st.header("KALKULATOR PENGENCERAN")
 
-    M1 = float(input("Masukkan M1 (M): "))
-    V1 = float(input("Masukkan V1 (mL): "))
-    M2 = float(input("Masukkan M2 (M): "))
+    M1 = st.number_input("Masukkan M1 (M):", min_value=0.0)
+    V1 = st.number_input("Masukkan V1 (mL):", min_value=0.0)
+    M2 = st.number_input("Masukkan M2 (M):", min_value=0.0001)
 
-    V2 = (M1 * V1) / M2
+    if st.button("Hitung Pengenceran"):
 
-    print("\nV2 =", round(V2, 2), "mL")
+        V2 = (M1 * V1) / M2
+
+        st.success(f"V2 = {round(V2, 2)} mL")
 
 # =====================================================
 # MENU KADAR
 # =====================================================
 
-def menu_kadar():
-    while True:
+elif menu == "Kalkulator Kadar":
 
-        print("\n=== KALKULATOR KADAR ===")
-        print("1. Kadar Asam Asetat")
-        print("2. NaOH dan Na2CO3 (Warder)")
-        print("3. Kadar Besi(Fe)")
-        print("4. Kadar Klorida(Cl)Iodometri")
-        print("5. Kadar Klorida(Cl)Argentometri")
-        print("6. Kesadahan Air")
-        print("7. Kembali")
-        
-        pilih = input("Pilih menu : ")
-        if pilih == "1":
-            kadar_asam_asetat()
+    pilihan = st.selectbox(
+        "Pilih Jenis Kadar",
+        [
+            "Kadar Asam Asetat",
+            "NaOH dan Na2CO3 (Warder)",
+            "Kadar Besi(Fe)",
+            "Kadar Klorida(Cl) Iodometri",
+            "Kadar Klorida(Cl) Argentometri",
+            "Kesadahan Air"
+        ]
+    )
 
-        elif pilih == "2":
-            kadar_warder()
+    # =====================================================
+    # KADAR ASAM ASETAT
+    # =====================================================
 
-        elif pilih == "3":
-            kadar_besi()
+    if pilihan == "Kadar Asam Asetat":
 
-        elif pilih == "4":
-            kadar_klorida_iodometri()
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        FP = st.number_input("Faktor pengenceran")
+        V_sampel = st.number_input("Volume sampel (mL)")
 
-        elif pilih == "5":
-            kadar_klorida_argentometri()
-            
-        elif pilih == "6":
-            kadar_kesadahan()
+        if st.button("Hitung"):
 
-        elif pilih == "7":
-            break
+            hasil = ((V * N * 60) * (10**-3) * FP * 100) / V_sampel
 
-        else:
-            print("Pilihan tidak valid")
+            st.success(f"Kadar CH3COOH = {round(hasil,2)} %")
 
-def kadar_asam_asetat():
-    print("\n=== KADAR ASAM ASETAT ===")
-    V = float(input("Masukkan volume titrasi/V(mL):"))
-    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
-    FP = float(input("Faktor pengenceran:"))
-    V_sampel = float(input("Masukkan volume sampel (mL):"))
-    hasil = ((V * N * 60) * (10**-3) * FP * 100) / V_sampel
+    # =====================================================
+    # WARDER
+    # =====================================================
 
-    print("\nKadar CH3COOH =", round(hasil, 2), "%")
+    elif pilihan == "NaOH dan Na2CO3 (Warder)":
 
-def kadar_warder():
+        a = st.number_input("Volume titrasi 1/a(mL)")
+        b = st.number_input("Volume titrasi 2/b(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
 
-    print("\n=== KADAR METODE WARDER ===")
-    a = float(input("Masukkan volume titrasi 1/a(mL):"))
-    b = float(input("Masukkan volume titrasi 2/b(mL):"))
-    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
-    V_sampel = float(input("Masukkan volume sampel (mL):"))
-    BE_NaOH = 40
-    BE_Na2CO3 = 53
-    
-    Na2CO3 = ((2 * (b-a)* N * BE_Na2CO3) * (10**-3) * 100) / V_sampel
-    NaOH = ((2*a - b)* N * BE_NaOH) * (10**-3) * 100 / V_sampel
+        if st.button("Hitung"):
 
-    print("\nKadar NaOH =", round(Na2CO3, 2), "%")
-    print("\nKadar Na2CO3 =", round(NaOH, 2), "%")
+            BE_NaOH = 40
+            BE_Na2CO3 = 53
 
-def kadar_besi():
-    print("\n=== KADAR BESI (Fe) ===")
-    V = float(input("Masukkan volume titrasi/V(mL):"))
-    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
-    V_sampel = float(input("Masukkan volume sampel (mL):"))
-    hasil = ((V * N * 56) * (10**-3) * 100) / V_sampel
+            Na2CO3 = ((2 * (b-a)* N * BE_Na2CO3) * (10**-3) * 100) / V_sampel
+            NaOH = ((2*a - b)* N * BE_NaOH) * (10**-3) * 100 / V_sampel
 
-    print("\nKadar Fe =", round(hasil, 2), "%")
-    
-def kadar_klorida_iodometri():
-    print("\n=== KADAR KLORIDA (IODOMETRI)(Cl) ===")
-    V = float(input("Masukkan volume titrasi/V(mL):"))
-    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
-    V_sampel = float(input("Masukkan volume sampel (mL):"))
-    hasil = ((V * N * 17.75) * (10**-3) * 100/5 * 100) / V_sampel
+            st.success(f"Kadar NaOH = {round(NaOH,2)} %")
+            st.success(f"Kadar Na2CO3 = {round(Na2CO3,2)} %")
 
-    print("\nKadar Cl =", round(hasil, 2), "%")
+    # =====================================================
+    # BESI
+    # =====================================================
 
-def kadar_klorida_argentometri():
-    print("\n=== KADAR KLORIDA (ARGENTOMETRI)(Cl) ===")
-    V = float(input("Masukkan volume titrasi/V(mL):"))
-    N = float(input("Masukkan normalitas/N(mgrek/mL):"))
-    V_sampel = float(input("Masukkan volume sampel (mL):"))
-    hasil = ((V * N * 35.5) * (10**-3) * 100) / V_sampel
+    elif pilihan == "Kadar Besi(Fe)":
 
-    print("\nKadar Cl =", round(hasil, 2), "%")
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
 
+        if st.button("Hitung"):
 
-def kadar_kesadahan():
-    print("\n=== KADAR KESADAHAN AIR ===")
-    V = float(input("Masukkan volume titrasi/V(mL):"))
-    M = float(input("Masukkan molaritas/M(mmol/mL):"))
-    V_sampel = float(input("Masukkan volume sampel (L):"))
-    hasil = ((V * M * 100)) /V_sampel
+            hasil = ((V * N * 56) * (10**-3) * 100) / V_sampel
 
-    print("\nKadar CaCO3 =", round(hasil, 2), "%")
-    
+            st.success(f"Kadar Fe = {round(hasil,2)} %")
+
+    # =====================================================
+    # IODOMETRI
+    # =====================================================
+
+    elif pilihan == "Kadar Klorida(Cl) Iodometri":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 17.75) * (10**-3) * 100/5 * 100) / V_sampel
+
+            st.success(f"Kadar Cl = {round(hasil,2)} %")
+
+    # =====================================================
+    # ARGENTOMETRI
+    # =====================================================
+
+    elif pilihan == "Kadar Klorida(Cl) Argentometri":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        N = st.number_input("Normalitas/N(mgrek/mL)")
+        V_sampel = st.number_input("Volume sampel (mL)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * N * 35.5) * (10**-3) * 100) / V_sampel
+
+            st.success(f"Kadar Cl = {round(hasil,2)} %")
+
+    # =====================================================
+    # KESADAHAN
+    # =====================================================
+
+    elif pilihan == "Kesadahan Air":
+
+        V = st.number_input("Volume titrasi/V(mL)")
+        M = st.number_input("Molaritas/M(mmol/mL)")
+        V_sampel = st.number_input("Volume sampel (L)")
+
+        if st.button("Hitung"):
+
+            hasil = ((V * M * 100)) / V_sampel
+
+            st.success(f"Kadar CaCO3 = {round(hasil,2)} %")
 
 # =====================================================
 # MENU pH
 # =====================================================
 
-def ph():
+elif menu == "Kalkulator pH":
 
-    print("\n=== KALKULATOR pH ===")
+    st.header("KALKULATOR pH")
 
-    h = float(input("Masukkan konsentrasi H+ (mol/L): "))
+    h = st.number_input("Masukkan konsentrasi H+ (mol/L):", min_value=0.0000001)
 
-    hasil = -math.log10(h)
+    if st.button("Hitung pH"):
 
-    print("\npH =", round(hasil, 2))
+        hasil = -math.log10(h)
 
-# =====================================================
-# PROGRAM UTAMA
-# =====================================================
-
-while True:
-
-    header()
-
-    print("""
-MENU UTAMA
-
-1. Cek Stok Alat Laboratorium
-2. Kalkulator Molaritas
-3. Kalkulator Pengenceran
-4. Kalkulator Kadar
-5. Kalkulator pH
-6. Keluar
-""")
-
-    pilihan = input("Masukkan pilihan : ")
-
-    # =================================================
-
-    if pilihan == "1":
-        cek_alat()
-
-    elif pilihan == "2":
-        molaritas()
-
-    elif pilihan == "3":
-        pengenceran()
-
-    elif pilihan == "4":
-        menu_kadar()
-
-    elif pilihan == "5":
-        ph()
-
-    elif pilihan == "6":
-
-        print("\nProgram selesai")
-        break
-
-    else:
-
-        print("\nPilihan tidak valid")
-
-    input("\nTekan ENTER untuk kembali ke menu...")
+        st.success(f"pH = {round(hasil,2)}")
