@@ -249,6 +249,29 @@ def save_knowledge(topik, penjelasan):
 
 init_db()
 
+def safe_rerun():
+    """Kompatibilitas untuk Streamlit versi lama dan baru."""
+    if hasattr(st, "rerun"):
+        safe_rerun()
+    elif hasattr(st, "experimental_rerun"):
+        st.experimental_rerun()
+
+def safe_toast(pesan):
+    """Kompatibilitas untuk Streamlit versi lama yang belum punya st.toast."""
+    if hasattr(st, "toast"):
+        st.toast(pesan)
+    else:
+        st.success(pesan)
+
+def tampilkan_jawaban_ai(teks):
+    """Menampilkan jawaban AI tanpa error pada Streamlit versi lama."""
+    if hasattr(st, "chat_message"):
+        with st.chat_message("assistant"):
+            st.write(teks)
+    else:
+        st.info(teks)
+
+
 # ==============================================================================
 # LOGIKA PARSING RUMUS KIMIA
 # ==============================================================================
@@ -606,32 +629,13 @@ elif pilih_fitur == "Kalkulator BM / Mr":
     col_input, col_output = st.columns([1.2, 1.3])
 
     with col_input:
+        if "rumus_input" not in st.session_state:
+            st.session_state["rumus_input"] = "Fe(NH4)2(SO4)2.6H2O"
+
         rumus = st.text_input(
             "🧪 Masukkan Rumus Kimia:",
-            value="Fe(NH4)2(SO4)2.6H2O",
+            key="rumus_input",
             placeholder="Contoh: H2O, NaCl, Ca(OH)2, Al2(SO4)3, CuSO4.5H2O"
         )
 
-        simpan = st.checkbox("Simpan hasil ke database riwayat", value=True)
-
-        st.markdown("**Contoh cepat:**")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if st.button("H2O", use_container_width=True):
-                rumus = "H2O"
-        with c2:
-            if st.button("Ca(OH)2", use_container_width=True):
-                rumus = "Ca(OH)2"
-        with c3:
-            if st.button("FAS", use_container_width=True):
-                rumus = "Fe(NH4)2(SO4)2.6H2O"
-
-        hitung = st.button("🔥 Hitung Bobot Molekul", use_container_width=True)
-
-    with col_output:
-        st.markdown("<h3 style='color:#38bdf8;'>📌 Hasil Perhitungan</h3>", unsafe_allow_html=True)
-
-        if hitung:
-            total, detail_df, error = hitung_bobot_molekul(rumus)
-
-            if error:
+        simpan = st.checkbox("Simpan hasil ke database riway
