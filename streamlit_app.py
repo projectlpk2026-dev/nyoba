@@ -638,4 +638,147 @@ elif pilih_fitur == "Kalkulator BM / Mr":
             placeholder="Contoh: H2O, NaCl, Ca(OH)2, Al2(SO4)3, CuSO4.5H2O"
         )
 
-        simpan = st.checkbox("Simpan hasil ke database riway
+        simpan = st.checkbox("Simpan hasil ke database riwayat", value=True)
+
+        st.markdown("**Contoh cepat:**")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            if st.button("H2O", use_container_width=True):
+                st.session_state["rumus_input"] = "H2O"
+                safe_rerun()
+        with c2:
+            if st.button("Ca(OH)2", use_container_width=True):
+                st.session_state["rumus_input"] = "Ca(OH)2"
+                safe_rerun()
+        with c3:
+            if st.button("FAS", use_container_width=True):
+                st.session_state["rumus_input"] = "Fe(NH4)2(SO4)2.6H2O"
+                safe_rerun()
+
+        hitung = st.button("🔥 Hitung Bobot Molekul", use_container_width=True)
+
+    with col_output:
+        st.markdown("<h3 style='color:#38bdf8;'>📌 Hasil Perhitungan</h3>", unsafe_allow_html=True)
+
+        if hitung:
+            total, detail_df, error = hitung_bobot_molekul(rumus)
+
+            if error:
+                st.error(error)
+            else:
+                st.success(f"BM / Mr {rumus} = {total:.4f} g/mol")
+                st.dataframe(detail_df, use_container_width=True)
+
+                st.markdown("<h3 class='section-head'>🧠 Pembahasan Otomatis</h3>", unsafe_allow_html=True)
+                st.info(generate_pembahasan(rumus, total, detail_df))
+
+                st.markdown("<h3 class='section-head'>🧾 Rincian Perhitungan</h3>", unsafe_allow_html=True)
+                for _, item in detail_df.iterrows():
+                    st.write(
+                        f"{item['Simbol Unsur']} ({item['Nama Unsur']}) = "
+                        f"{item['Massa Atom (Ar)']} × {item['Jumlah Atom']} = "
+                        f"{item['Subtotal Massa']:.4f} g/mol"
+                    )
+
+                if simpan:
+                    save_history(rumus, total, detail_df)
+                    safe_toast("Hasil berhasil disimpan ke database riwayat.")
+
+        else:
+            st.caption("Hasil akan muncul setelah tombol hitung ditekan. Mengejutkan, tombol memang harus ditekan dulu.")
+
+# ==============================================================================
+# HALAMAN DATABASE UNSUR
+# ==============================================================================
+
+elif pilih_fitur == "Database Unsur":
+    st.markdown("<h1 style='color:#38bdf8;'>🧬 Database Unsur Kimia</h1>", unsafe_allow_html=True)
+    st.caption("Berisi 118 unsur kimia dengan simbol, nama, nomor atom, dan massa atom relatif.")
+    st.markdown("---")
+
+    df_unsur = pd.DataFrame([
+        {
+            "Simbol": simbol,
+            "Nama Unsur": data["nama"],
+            "Nomor Atom": data["nomor_atom"],
+            "Massa Atom": data["massa_atom"]
+        }
+        for simbol, data in unsur.items()
+    ])
+
+    keyword = st.text_input("🔎 Cari unsur:", placeholder="Contoh: Fe, Besi, Oksigen")
+    if keyword:
+        keyword_lower = keyword.lower()
+        df_tampil = df_unsur[
+            df_unsur["Simbol"].str.lower().str.contains(keyword_lower) |
+            df_unsur["Nama Unsur"].str.lower().str.contains(keyword_lower)
+        ]
+    else:
+        df_tampil = df_unsur
+
+    st.dataframe(df_tampil, use_container_width=True, height=500)
+
+# ==============================================================================
+# HALAMAN RIWAYAT
+# ==============================================================================
+
+elif pilih_fitur == "Riwayat Perhitungan":
+    st.markdown("<h1 style='color:#38bdf8;'>📊 Riwayat Perhitungan BM</h1>", unsafe_allow_html=True)
+    st.caption("Seluruh hasil hitung yang disimpan masuk ke database SQLite lokal.")
+    st.markdown("---")
+
+    history_df = get_history()
+
+    if history_df.empty:
+        st.info("Belum ada riwayat perhitungan yang tersimpan.")
+    else:
+        st.dataframe(history_df, use_container_width=True)
+
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.metric("Total Perhitungan", len(history_df))
+        with col_b:
+            st.metric("Rata-rata BM", f"{history_df['total_bm'].mean():.3f} g/mol")
+        with col_c:
+            st.metric("BM Maksimum", f"{history_df['total_bm'].max():.3f} g/mol")
+
+        st.markdown("<h3 class='section-head'>📈 Grafik Riwayat BM</h3>", unsafe_allow_html=True)
+        grafik_df = history_df.sort_values("waktu")
+        st.line_chart(grafik_df.set_index("waktu")["total_bm"])
+
+        st.markdown("---")
+        if st.button("🗑️ Hapus Semua Riwayat", use_container_width=True):
+            clear_history()
+            safe_rerun()
+
+# ==============================================================================
+# HALAMAN AI MINI
+# ==============================================================================
+
+elif pilih_fitur == "Inteligensia & Konsultasi AI":
+    st.markdown("<h1 style='color:#38bdf8;'>🧠 Inteligensia & Konsultasi BM</h1>", unsafe_allow_html=True)
+    st.caption("Chatbot sederhana berbasis keyword dan manajemen pengetahuan.")
+    st.markdown("---")
+
+    col_chat, col_memori = st.columns(2)
+
+    with col_chat:
+        st.markdown("<h4 style='color:#fff;'>💬 Tanya Sistem</h4>", unsafe_allow_html=True)
+        chat_in = st.text_input("Ketik pertanyaan:", placeholder="Contoh: apa itu mr, hidrat, fas, rekap")
+        if chat_in:
+            tampilkan_jawaban_ai(ai_chatbot_bm(chat_in))
+
+    with col_memori:
+        st.markdown("<h4 style='color:#fff;'>💾 Tambah Pengetahuan</h4>", unsafe_allow_html=True)
+        topik = st.text_input("Topik / kata kunci:").lower().strip()
+        penjelasan = st.text_area("Penjelasan:")
+        if st.button("🚀 Simpan ke Memori", use_container_width=True):
+            if topik and penjelasan:
+                save_knowledge(topik, penjelasan)
+                safe_toast("Pengetahuan baru berhasil disimpan.")
+                safe_rerun()
+            else:
+                st.warning("Topik dan penjelasan tidak boleh kosong.")
+
+    st.markdown("<h3 class='section-head'>📚 Isi Memori Sistem</h3>", unsafe_allow_html=True)
+    st.json(get_knowledge())
