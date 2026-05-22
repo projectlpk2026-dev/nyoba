@@ -1,113 +1,488 @@
 import streamlit as st
-import re
 import pandas as pd
 
 # =========================
-# DATABASE MASSA ATOM
+# DATABASE UNSUR LENGKAP 1-118
 # =========================
+
 unsur = {
-    "H": 1.008,
-    "He": 4.0026,
-    "Li": 6.94,
-    "Be": 9.0122,
-    "B": 10.81,
-    "C": 12.011,
-    "N": 14.007,
-    "O": 15.999,
-    "F": 18.998,
-    "Ne": 20.180,
-    "Na": 22.990,
-    "Mg": 24.305,
-    "Al": 26.982,
-    "Si": 28.085,
-    "P": 30.974,
-    "S": 32.06,
-    "Cl": 35.45,
-    "Ar": 39.948,
-    "K": 39.098,
-    "Ca": 40.078,
-    "Fe": 55.845,
-    "Cu": 63.546,
-    "Zn": 65.38,
-    "Ag": 107.868,
-    "I": 126.904,
-    "Ba": 137.327,
-    "Au": 196.967,
-    "Hg": 200.592,
-    "Pb": 207.2
+    "H": {"nama": "Hidrogen", "nomor_atom": 1, "massa_atom": 1.008},
+    "He": {"nama": "Helium", "nomor_atom": 2, "massa_atom": 4.0026},
+    "Li": {"nama": "Litium", "nomor_atom": 3, "massa_atom": 6.94},
+    "Be": {"nama": "Berilium", "nomor_atom": 4, "massa_atom": 9.0122},
+    "B": {"nama": "Boron", "nomor_atom": 5, "massa_atom": 10.81},
+    "C": {"nama": "Karbon", "nomor_atom": 6, "massa_atom": 12.011},
+    "N": {"nama": "Nitrogen", "nomor_atom": 7, "massa_atom": 14.007},
+    "O": {"nama": "Oksigen", "nomor_atom": 8, "massa_atom": 15.999},
+    "F": {"nama": "Fluorin", "nomor_atom": 9, "massa_atom": 18.998},
+    "Ne": {"nama": "Neon", "nomor_atom": 10, "massa_atom": 20.180},
+    "Na": {"nama": "Natrium", "nomor_atom": 11, "massa_atom": 22.990},
+    "Mg": {"nama": "Magnesium", "nomor_atom": 12, "massa_atom": 24.305},
+    "Al": {"nama": "Aluminium", "nomor_atom": 13, "massa_atom": 26.982},
+    "Si": {"nama": "Silikon", "nomor_atom": 14, "massa_atom": 28.085},
+    "P": {"nama": "Fosfor", "nomor_atom": 15, "massa_atom": 30.974},
+    "S": {"nama": "Sulfur", "nomor_atom": 16, "massa_atom": 32.06},
+    "Cl": {"nama": "Klorin", "nomor_atom": 17, "massa_atom": 35.45},
+    "Ar": {"nama": "Argon", "nomor_atom": 18, "massa_atom": 39.948},
+    "K": {"nama": "Kalium", "nomor_atom": 19, "massa_atom": 39.098},
+    "Ca": {"nama": "Kalsium", "nomor_atom": 20, "massa_atom": 40.078},
+    "Sc": {"nama": "Skandium", "nomor_atom": 21, "massa_atom": 44.956},
+    "Ti": {"nama": "Titanium", "nomor_atom": 22, "massa_atom": 47.867},
+    "V": {"nama": "Vanadium", "nomor_atom": 23, "massa_atom": 50.942},
+    "Cr": {"nama": "Kromium", "nomor_atom": 24, "massa_atom": 51.996},
+    "Mn": {"nama": "Mangan", "nomor_atom": 25, "massa_atom": 54.938},
+    "Fe": {"nama": "Besi", "nomor_atom": 26, "massa_atom": 55.845},
+    "Co": {"nama": "Kobalt", "nomor_atom": 27, "massa_atom": 58.933},
+    "Ni": {"nama": "Nikel", "nomor_atom": 28, "massa_atom": 58.693},
+    "Cu": {"nama": "Tembaga", "nomor_atom": 29, "massa_atom": 63.546},
+    "Zn": {"nama": "Seng", "nomor_atom": 30, "massa_atom": 65.38},
+    "Ga": {"nama": "Galium", "nomor_atom": 31, "massa_atom": 69.723},
+    "Ge": {"nama": "Germanium", "nomor_atom": 32, "massa_atom": 72.630},
+    "As": {"nama": "Arsen", "nomor_atom": 33, "massa_atom": 74.922},
+    "Se": {"nama": "Selenium", "nomor_atom": 34, "massa_atom": 78.971},
+    "Br": {"nama": "Bromin", "nomor_atom": 35, "massa_atom": 79.904},
+    "Kr": {"nama": "Kripton", "nomor_atom": 36, "massa_atom": 83.798},
+    "Rb": {"nama": "Rubidium", "nomor_atom": 37, "massa_atom": 85.468},
+    "Sr": {"nama": "Stronsium", "nomor_atom": 38, "massa_atom": 87.62},
+    "Y": {"nama": "Itrium", "nomor_atom": 39, "massa_atom": 88.906},
+    "Zr": {"nama": "Zirkonium", "nomor_atom": 40, "massa_atom": 91.224},
+    "Nb": {"nama": "Niobium", "nomor_atom": 41, "massa_atom": 92.906},
+    "Mo": {"nama": "Molibdenum", "nomor_atom": 42, "massa_atom": 95.95},
+    "Tc": {"nama": "Teknesium", "nomor_atom": 43, "massa_atom": 98},
+    "Ru": {"nama": "Rutenium", "nomor_atom": 44, "massa_atom": 101.07},
+    "Rh": {"nama": "Rodium", "nomor_atom": 45, "massa_atom": 102.906},
+    "Pd": {"nama": "Paladium", "nomor_atom": 46, "massa_atom": 106.42},
+    "Ag": {"nama": "Perak", "nomor_atom": 47, "massa_atom": 107.868},
+    "Cd": {"nama": "Kadmium", "nomor_atom": 48, "massa_atom": 112.414},
+    "In": {"nama": "Indium", "nomor_atom": 49, "massa_atom": 114.818},
+    "Sn": {"nama": "Timah", "nomor_atom": 50, "massa_atom": 118.710},
+    "Sb": {"nama": "Antimon", "nomor_atom": 51, "massa_atom": 121.760},
+    "Te": {"nama": "Telurium", "nomor_atom": 52, "massa_atom": 127.60},
+    "I": {"nama": "Iodin", "nomor_atom": 53, "massa_atom": 126.904},
+    "Xe": {"nama": "Xenon", "nomor_atom": 54, "massa_atom": 131.293},
+    "Cs": {"nama": "Sesium", "nomor_atom": 55, "massa_atom": 132.905},
+    "Ba": {"nama": "Barium", "nomor_atom": 56, "massa_atom": 137.327},
+    "La": {"nama": "Lantanum", "nomor_atom": 57, "massa_atom": 138.905},
+    "Ce": {"nama": "Serium", "nomor_atom": 58, "massa_atom": 140.116},
+    "Pr": {"nama": "Praseodimium", "nomor_atom": 59, "massa_atom": 140.908},
+    "Nd": {"nama": "Neodimium", "nomor_atom": 60, "massa_atom": 144.242},
+    "Pm": {"nama": "Prometium", "nomor_atom": 61, "massa_atom": 145},
+    "Sm": {"nama": "Samarium", "nomor_atom": 62, "massa_atom": 150.36},
+    "Eu": {"nama": "Europium", "nomor_atom": 63, "massa_atom": 151.964},
+    "Gd": {"nama": "Gadolinium", "nomor_atom": 64, "massa_atom": 157.25},
+    "Tb": {"nama": "Terbium", "nomor_atom": 65, "massa_atom": 158.925},
+    "Dy": {"nama": "Disprosium", "nomor_atom": 66, "massa_atom": 162.500},
+    "Ho": {"nama": "Holmium", "nomor_atom": 67, "massa_atom": 164.930},
+    "Er": {"nama": "Erbium", "nomor_atom": 68, "massa_atom": 167.259},
+    "Tm": {"nama": "Tulium", "nomor_atom": 69, "massa_atom": 168.934},
+    "Yb": {"nama": "Iterbium", "nomor_atom": 70, "massa_atom": 173.045},
+    "Lu": {"nama": "Lutesium", "nomor_atom": 71, "massa_atom": 174.967},
+    "Hf": {"nama": "Hafnium", "nomor_atom": 72, "massa_atom": 178.49},
+    "Ta": {"nama": "Tantalum", "nomor_atom": 73, "massa_atom": 180.948},
+    "W": {"nama": "Wolfram", "nomor_atom": 74, "massa_atom": 183.84},
+    "Re": {"nama": "Renium", "nomor_atom": 75, "massa_atom": 186.207},
+    "Os": {"nama": "Osmium", "nomor_atom": 76, "massa_atom": 190.23},
+    "Ir": {"nama": "Iridium", "nomor_atom": 77, "massa_atom": 192.217},
+    "Pt": {"nama": "Platina", "nomor_atom": 78, "massa_atom": 195.084},
+    "Au": {"nama": "Emas", "nomor_atom": 79, "massa_atom": 196.967},
+    "Hg": {"nama": "Merkuri", "nomor_atom": 80, "massa_atom": 200.592},
+    "Tl": {"nama": "Talium", "nomor_atom": 81, "massa_atom": 204.38},
+    "Pb": {"nama": "Timbal", "nomor_atom": 82, "massa_atom": 207.2},
+    "Bi": {"nama": "Bismut", "nomor_atom": 83, "massa_atom": 208.980},
+    "Po": {"nama": "Polonium", "nomor_atom": 84, "massa_atom": 209},
+    "At": {"nama": "Astatin", "nomor_atom": 85, "massa_atom": 210},
+    "Rn": {"nama": "Radon", "nomor_atom": 86, "massa_atom": 222},
+    "Fr": {"nama": "Fransium", "nomor_atom": 87, "massa_atom": 223},
+    "Ra": {"nama": "Radium", "nomor_atom": 88, "massa_atom": 226},
+    "Ac": {"nama": "Aktinium", "nomor_atom": 89, "massa_atom": 227},
+    "Th": {"nama": "Torium", "nomor_atom": 90, "massa_atom": 232.038},
+    "Pa": {"nama": "Protaktinium", "nomor_atom": 91, "massa_atom": 231.036},
+    "U": {"nama": "Uranium", "nomor_atom": 92, "massa_atom": 238.029},
+    "Np": {"nama": "Neptunium", "nomor_atom": 93, "massa_atom": 237},
+    "Pu": {"nama": "Plutonium", "nomor_atom": 94, "massa_atom": 244},
+    "Am": {"nama": "Amerisium", "nomor_atom": 95, "massa_atom": 243},
+    "Cm": {"nama": "Kurium", "nomor_atom": 96, "massa_atom": 247},
+    "Bk": {"nama": "Berkelium", "nomor_atom": 97, "massa_atom": 247},
+    "Cf": {"nama": "Kalifornium", "nomor_atom": 98, "massa_atom": 251},
+    "Es": {"nama": "Einsteinium", "nomor_atom": 99, "massa_atom": 252},
+    "Fm": {"nama": "Fermium", "nomor_atom": 100, "massa_atom": 257},
+    "Md": {"nama": "Mendelevium", "nomor_atom": 101, "massa_atom": 258},
+    "No": {"nama": "Nobelium", "nomor_atom": 102, "massa_atom": 259},
+    "Lr": {"nama": "Lawrensium", "nomor_atom": 103, "massa_atom": 266},
+    "Rf": {"nama": "Rutherfordium", "nomor_atom": 104, "massa_atom": 267},
+    "Db": {"nama": "Dubnium", "nomor_atom": 105, "massa_atom": 268},
+    "Sg": {"nama": "Seaborgium", "nomor_atom": 106, "massa_atom": 269},
+    "Bh": {"nama": "Bohrium", "nomor_atom": 107, "massa_atom": 270},
+    "Hs": {"nama": "Hassium", "nomor_atom": 108, "massa_atom": 277},
+    "Mt": {"nama": "Meitnerium", "nomor_atom": 109, "massa_atom": 278},
+    "Ds": {"nama": "Darmstadtium", "nomor_atom": 110, "massa_atom": 281},
+    "Rg": {"nama": "Roentgenium", "nomor_atom": 111, "massa_atom": 282},
+    "Cn": {"nama": "Kopernisium", "nomor_atom": 112, "massa_atom": 285},
+    "Nh": {"nama": "Nihonium", "nomor_atom": 113, "massa_atom": 286},
+    "Fl": {"nama": "Flerovium", "nomor_atom": 114, "massa_atom": 289},
+    "Mc": {"nama": "Moskovium", "nomor_atom": 115, "massa_atom": 290},
+    "Lv": {"nama": "Livermorium", "nomor_atom": 116, "massa_atom": 293},
+    "Ts": {"nama": "Tenesin", "nomor_atom": 117, "massa_atom": 294},
+    "Og": {"nama": "Oganeson", "nomor_atom": 118, "massa_atom": 294}
 }
 
 # =========================
-# FUNGSI HITUNG Mr
+# DATA PERIODIK OTOMATIS
 # =========================
-def hitung_mr(rumus):
-    pola = r'([A-Z][a-z]?)(\d*)'
-    hasil = re.findall(pola, rumus)
 
-    if not hasil:
-        return None, "Format rumus kimia tidak valid."
+periode_data = {
+    1: ["H", "He"],
+    2: ["Li", "Be", "B", "C", "N", "O", "F", "Ne"],
+    3: ["Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar"],
+    4: ["K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"],
+    5: ["Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe"],
+    6: ["Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu",
+        "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn"],
+    7: ["Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr",
+        "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"]
+}
 
-    data = []
-    total_mr = 0
+golongan_data = {
+    "H": 1, "Li": 1, "Na": 1, "K": 1, "Rb": 1, "Cs": 1, "Fr": 1,
+    "Be": 2, "Mg": 2, "Ca": 2, "Sr": 2, "Ba": 2, "Ra": 2,
+    "Sc": 3, "Y": 3, "La": 3, "Ac": 3,
+    "Ti": 4, "Zr": 4, "Hf": 4, "Rf": 4,
+    "V": 5, "Nb": 5, "Ta": 5, "Db": 5,
+    "Cr": 6, "Mo": 6, "W": 6, "Sg": 6,
+    "Mn": 7, "Tc": 7, "Re": 7, "Bh": 7,
+    "Fe": 8, "Ru": 8, "Os": 8, "Hs": 8,
+    "Co": 9, "Rh": 9, "Ir": 9, "Mt": 9,
+    "Ni": 10, "Pd": 10, "Pt": 10, "Ds": 10,
+    "Cu": 11, "Ag": 11, "Au": 11, "Rg": 11,
+    "Zn": 12, "Cd": 12, "Hg": 12, "Cn": 12,
+    "B": 13, "Al": 13, "Ga": 13, "In": 13, "Tl": 13, "Nh": 13,
+    "C": 14, "Si": 14, "Ge": 14, "Sn": 14, "Pb": 14, "Fl": 14,
+    "N": 15, "P": 15, "As": 15, "Sb": 15, "Bi": 15, "Mc": 15,
+    "O": 16, "S": 16, "Se": 16, "Te": 16, "Po": 16, "Lv": 16,
+    "F": 17, "Cl": 17, "Br": 17, "I": 17, "At": 17, "Ts": 17,
+    "He": 18, "Ne": 18, "Ar": 18, "Kr": 18, "Xe": 18, "Rn": 18, "Og": 18
+}
 
-    for simbol, jumlah in hasil:
+non_logam = {"H", "C", "N", "O", "P", "S", "Se"}
+gas_mulia = {"He", "Ne", "Ar", "Kr", "Xe", "Rn", "Og"}
+halogen = {"F", "Cl", "Br", "I", "At", "Ts"}
+logam_alkali = {"Li", "Na", "K", "Rb", "Cs", "Fr"}
+alkali_tanah = {"Be", "Mg", "Ca", "Sr", "Ba", "Ra"}
+metaloid = {"B", "Si", "Ge", "As", "Sb", "Te"}
+lantanida = {"La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"}
+aktinida = {"Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"}
+
+gas = {"H", "He", "N", "O", "F", "Ne", "Cl", "Ar", "Kr", "Xe", "Rn"}
+cair = {"Br", "Hg"}
+
+
+def cari_periode(simbol):
+    for periode, daftar in periode_data.items():
+        if simbol in daftar:
+            return periode
+    return "-"
+
+
+def cari_jenis(simbol):
+    if simbol in gas_mulia:
+        return "Gas Mulia"
+    elif simbol in halogen:
+        return "Halogen"
+    elif simbol in logam_alkali:
+        return "Logam Alkali"
+    elif simbol in alkali_tanah:
+        return "Logam Alkali Tanah"
+    elif simbol in metaloid:
+        return "Metaloid"
+    elif simbol in lantanida:
+        return "Lantanida"
+    elif simbol in aktinida:
+        return "Aktinida"
+    elif simbol in non_logam:
+        return "Non Logam"
+    return "Logam"
+
+
+def cari_wujud(simbol):
+    if simbol in gas:
+        return "Gas"
+    elif simbol in cair:
+        return "Cair"
+    return "Padat"
+
+
+def cari_blok(simbol):
+    golongan = golongan_data.get(simbol, "-")
+    if simbol in lantanida or simbol in aktinida:
+        return "f"
+    if golongan in [1, 2]:
+        return "s"
+    if isinstance(golongan, int) and 3 <= golongan <= 12:
+        return "d"
+    if isinstance(golongan, int) and 13 <= golongan <= 18:
+        return "p"
+    return "-"
+
+
+# =========================
+# FUNGSI PARSING RUMUS KIMIA
+# =========================
+
+def parse_rumus(rumus):
+    stack = [{}]
+    i = 0
+
+    while i < len(rumus):
+        karakter = rumus[i]
+
+        if karakter == "(":
+            stack.append({})
+            i += 1
+
+        elif karakter == ")":
+            if len(stack) == 1:
+                raise ValueError("Tanda kurung tidak sesuai.")
+
+            grup = stack.pop()
+            i += 1
+
+            angka = ""
+            while i < len(rumus) and rumus[i].isdigit():
+                angka += rumus[i]
+                i += 1
+
+            pengali = int(angka) if angka else 1
+
+            for simbol, jumlah in grup.items():
+                stack[-1][simbol] = stack[-1].get(simbol, 0) + jumlah * pengali
+
+        elif karakter.isupper():
+            simbol = karakter
+            i += 1
+
+            if i < len(rumus) and rumus[i].islower():
+                simbol += rumus[i]
+                i += 1
+
+            angka = ""
+            while i < len(rumus) and rumus[i].isdigit():
+                angka += rumus[i]
+                i += 1
+
+            jumlah = int(angka) if angka else 1
+            stack[-1][simbol] = stack[-1].get(simbol, 0) + jumlah
+
+        else:
+            raise ValueError("Format rumus kimia tidak valid.")
+
+    if len(stack) != 1:
+        raise ValueError("Tanda kurung tidak sesuai.")
+
+    return stack[0]
+
+
+# =========================
+# FUNGSI HITUNG BOBOT MOLEKUL
+# =========================
+
+def hitung_bobot_molekul(rumus):
+    rumus = rumus.strip()
+
+    if rumus == "":
+        return None, None, "Rumus kimia tidak boleh kosong."
+
+    try:
+        hasil_parse = parse_rumus(rumus)
+    except ValueError as e:
+        return None, None, str(e)
+
+    total = 0
+    detail = []
+
+    for simbol, jumlah_atom in hasil_parse.items():
         if simbol not in unsur:
-            return None, f"Unsur '{simbol}' tidak ditemukan dalam database."
+            return None, None, f"Unsur '{simbol}' tidak ditemukan dalam database."
 
-        jumlah_atom = int(jumlah) if jumlah else 1
-        massa_atom = unsur[simbol]
-        subtotal = massa_atom * jumlah_atom
-        total_mr += subtotal
+        data = unsur[simbol]
+        subtotal = data["massa_atom"] * jumlah_atom
+        total += subtotal
 
-        data.append({
+        detail.append({
             "Simbol Unsur": simbol,
+            "Nama Unsur": data["nama"],
+            "Nomor Atom": data["nomor_atom"],
             "Jumlah Atom": jumlah_atom,
-            "Massa Atom": massa_atom,
-            "Subtotal Massa": subtotal
+            "Massa Atom": data["massa_atom"],
+            "Subtotal Massa": round(subtotal, 3)
         })
 
-    return data, total_mr
+    return round(total, 3), detail, None
 
 
 # =========================
-# TAMPILAN WEB
+# TAMPILAN KARTU UNSUR
 # =========================
+
+def tampilkan_kartu_unsur(simbol):
+    data = unsur[simbol]
+
+    nama = data["nama"]
+    nomor_atom = data["nomor_atom"]
+    massa_atom = data["massa_atom"]
+
+    jenis = cari_jenis(simbol)
+    golongan = golongan_data.get(simbol, "-")
+    periode = cari_periode(simbol)
+    blok = cari_blok(simbol)
+    wujud = cari_wujud(simbol)
+
+    elektron = nomor_atom
+    proton = nomor_atom
+    neutron = round(massa_atom) - nomor_atom
+
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(145deg, #020617, #0f172a);
+            padding: 24px;
+            border-radius: 22px;
+            color: white;
+            box-shadow: 0 0 20px rgba(56,189,248,0.25);
+            margin-bottom: 25px;
+            font-family: Arial;
+        ">
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <div style="
+                    background: linear-gradient(145deg, #0f3b63, #082f49);
+                    width: 130px;
+                    height: 130px;
+                    border-radius: 22px;
+                    padding: 15px;
+                    box-shadow: inset 0 0 15px rgba(255,255,255,0.15);
+                ">
+                    <div style="color:#38bdf8; font-size:24px;">{nomor_atom}</div>
+                    <div style="font-size:58px; font-weight:bold; text-align:center;">{simbol}</div>
+                    <div style="color:#38bdf8; font-size:20px;">{massa_atom}</div>
+                </div>
+
+                <div>
+                    <div style="color:#22c55e; font-size:34px; font-weight:bold;">{nama.upper()}</div>
+                    <div style="color:#38bdf8; font-size:26px;">{jenis}</div>
+                </div>
+            </div>
+
+            <br>
+
+            <div style="
+                display:grid;
+                grid-template-columns: repeat(3, 1fr);
+                text-align:center;
+                background:#0f172a;
+                padding:15px;
+                border-radius:15px;
+            ">
+                <div><b style="color:#38bdf8;">ELEKTRON</b><br>{elektron}</div>
+                <div><b style="color:#f97316;">PROTON</b><br>{proton}</div>
+                <div><b style="color:#cbd5e1;">NEUTRON</b><br>{neutron}</div>
+            </div>
+
+            <br>
+
+            <div style="
+                display:grid;
+                grid-template-columns: repeat(3, 1fr);
+                text-align:center;
+                background:#111827;
+                padding:15px;
+                border-radius:15px;
+            ">
+                <div><b style="color:#38bdf8;">GOLONGAN</b><br>{golongan}</div>
+                <div><b style="color:#38bdf8;">PERIODE</b><br>{periode}</div>
+                <div><b style="color:#fb7185;">BLOK</b><br>{blok}</div>
+            </div>
+
+            <br>
+
+            <div style="
+                background:#111827;
+                padding:18px;
+                border-radius:18px;
+                line-height:1.8;
+            ">
+                <b style="color:#38bdf8;">Deskripsi:</b><br>
+                {nama} adalah unsur kimia dengan simbol {simbol}, nomor atom {nomor_atom},
+                massa atom {massa_atom} g/mol, termasuk {jenis}, berada pada golongan
+                {golongan}, periode {periode}, dan blok {blok}.
+            </div>
+
+            <br>
+
+            <div style="
+                background:#111827;
+                padding:18px;
+                border-radius:18px;
+                line-height:1.9;
+            ">
+                <b>Penampilan:</b> Data umum unsur<br>
+                <b>Wujud zat:</b> {wujud}<br>
+                <b>Jenis:</b> {jenis}<br>
+                <b>Berat atom:</b> {massa_atom} g/mol<br>
+                <b>Nomor atom:</b> {nomor_atom}<br>
+                <b>Valensi:</b> Data belum tersedia<br>
+                <b>Keadaan oksidasi:</b> Data belum tersedia<br>
+                <b>Titik leleh:</b> Data belum tersedia<br>
+                <b>Titik didih:</b> Data belum tersedia
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# =========================
+# TAMPILAN STREAMLIT
+# =========================
+
 st.set_page_config(
     page_title="Kalkulator Bobot Molekul",
     page_icon="⚗️",
     layout="centered"
 )
 
-st.title("⚗️ Kalkulator Bobot Molekul")
-st.write("Aplikasi ini digunakan untuk menghitung bobot molekul atau Mr suatu senyawa kimia.")
+st.title("⚗️ Kalkulator Bobot Molekul / Mr")
 
-rumus = st.text_input(
-    "Masukkan rumus kimia senyawa:",
-    placeholder="Contoh: H2O, CO2, NaCl, C6H12O6"
+st.write(
+    "Aplikasi ini digunakan untuk menghitung bobot molekul atau Mr "
+    "berdasarkan rumus kimia senyawa."
 )
 
-if st.button("Hitung Mr"):
-    if rumus.strip() == "":
-        st.warning("Masukkan rumus kimia terlebih dahulu.")
+rumus = st.text_input(
+    "Masukkan Rumus Kimia",
+    placeholder="Contoh: H2O, CO2, NaCl, C6H12O6, Ca(OH)2, Al2(SO4)3"
+)
+
+if st.button("Hitung Bobot Molekul"):
+    total, detail, error = hitung_bobot_molekul(rumus)
+
+    if error:
+        st.error(error)
     else:
-        data, hasil = hitung_mr(rumus.strip())
+        df = pd.DataFrame(detail)
 
-        if data is None:
-            st.error(hasil)
-        else:
-            df = pd.DataFrame(data)
+        st.subheader("Tabel Hasil Perhitungan")
+        st.dataframe(df, use_container_width=True)
 
-            st.subheader("Hasil Perhitungan")
-            st.dataframe(df, use_container_width=True)
+        st.subheader("Total Bobot Molekul")
+        st.success(f"Mr {rumus} = {total} g/mol")
 
-            st.success(f"Bobot molekul (Mr) dari {rumus} adalah {hasil:.3f} g/mol")
+        st.subheader("Rincian Perhitungan")
+        for item in detail:
+            st.write(
+                f"{item['Simbol Unsur']} ({item['Nama Unsur']}) = "
+                f"{item['Massa Atom']} × {item['Jumlah Atom']} = "
+                f"{item['Subtotal Massa']} g/mol"
+            )
 
-            st.subheader("Rincian Perhitungan")
-            for item in data:
-                st.write(
-                    f"{item['Simbol Unsur']} : "
-                    f"{item['Massa Atom']} × {item['Jumlah Atom']} = "
-                    f"{item['Subtotal Massa']:.3f}"
-                )
-
-            st.write(f"**Total Mr = {hasil:.3f} g/mol**")
+        st.subheader("Tampilan Detail Unsur")
+        for item in detail:
+            tampilkan_kartu_unsur(item["Simbol Unsur"])
