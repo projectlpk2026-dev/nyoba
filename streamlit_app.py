@@ -1,4 +1,9 @@
- unsur = {
+import re
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+
+unsur = {
     "H": {"nama": "Hidrogen", "nomor_atom": 1, "massa_atom": 1.008, "golongan": "1A"},
     "He": {"nama": "Helium", "nomor_atom": 2, "massa_atom": 4.0026, "golongan": "8A"},
     "Li": {"nama": "Litium", "nomor_atom": 3, "massa_atom": 6.94, "golongan": "1A"},
